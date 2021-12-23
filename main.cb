@@ -1,0 +1,13 @@
+from native include raylib;
+include game;
+
+class Main
+{
+    function Main()
+    {
+        InitWindow(800, 450, b"Hello Raylib");
+        SetTargetFPS(60);
+
+        game = Game();
+    }
+}

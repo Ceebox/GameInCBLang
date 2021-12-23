@@ -1,0 +1,17 @@
+class Game
+{
+    function Start()
+    {
+        self.GameLoop();
+    }
+
+    function GameLoop()
+    {
+        while not WindowShouldClose():
+            BeginDrawing();
+            ClearBackground(RAYWHITE);
+            DrawText(b"Hello World", 190, 200, 20, VIOLET);
+            EndDrawing();
+        CloseWindow();
+    }
+}
