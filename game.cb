@@ -1,17 +1,259 @@
+include player;
+include bullet;
+include enemy;
+from native include raylib;
+
 class Game
 {
+    //Main
+    //------------------------------------------------------------------------------------
     function Start()
     {
-        self.GameLoop();
+        //Player
+        this.player = Player(this);
+
+        //Stats
+        this.score = 0;
+        this.waveNumber = 1;
+
+        this.gameOver = false;
+
+        //Bullets
+        this.bullets = [];
+        this.enemyBullets = [];
+
+        //Enemies
+        this.enemies = [];
+        this.SpawnEnemies(this.waveNumber);
+
+        //Begin the gameloop
+        this.GameLoop();
     }
 
     function GameLoop()
     {
-        while not WindowShouldClose():
+        while not WindowShouldClose()
+        {
             BeginDrawing();
-            ClearBackground(RAYWHITE);
-            DrawText(b"Hello World", 190, 200, 20, VIOLET);
+            ClearBackground(GetColor(int("1a1a1aff", 16))); //Set background colour
+            this.Tick();
             EndDrawing();
+        }
         CloseWindow();
+    }
+
+    function Tick()
+    {
+        if not this.gameOver
+        {
+            //Player
+            this.UpdatePlayer();
+
+            //Stats
+            this.HandleScore();
+
+            //Bullets
+            this.UpdateBullets();
+            this.CheckBulletCollisions();
+
+            //Enemies
+            this.UpdateEnemies();
+        }
+        else
+        {
+            this.DrawGameOver();
+        }
+    }
+
+    //Player
+    //------------------------------------------------------------------------------------
+    function UpdatePlayer()
+    {
+        this.player.Update();
+        this.player.Render();
+    }
+
+    //Score
+    //------------------------------------------------------------------------------------
+    function HandleScore()
+    {
+        DrawText((str(this.score)).encode(), 10, 10, 20, GetColor(int("ffffffff", 16)));
+    }
+
+    //Bullets
+    //------------------------------------------------------------------------------------
+    function UpdateBullets()
+    {
+        for i in range(len(this.bullets))
+        {
+            this.bullets[i].Update();
+        }
+
+        for i in range(len(this.bullets))
+        {
+            this.bullets[i].Render();
+        }
+
+        for i in range(len(this.enemyBullets))
+        {
+            this.enemyBullets[i].Update();
+        }
+
+        for i in range(len(this.enemyBullets))
+        {
+            this.enemyBullets[i].Render();
+        }
+    }
+
+    function CheckBulletCollisions()
+    {
+        deletelist = [];
+        bdeletelist = [];
+
+        //Check for collisions between bullets and enemies
+        for i in range(len(this.bullets))
+        {
+            for j in range(len(this.enemies))
+            {
+                colliding = this.enemies[j].CheckCollision(this.bullets[i].posX, this.bullets[i].posY);
+                if (colliding)
+                {
+                    deletelist.append(j);
+                    bdeletelist.append(i);
+                }
+            }
+        }
+
+        //Delete collisions
+        for i in range(len(deletelist))
+        {
+            item = this.enemies.pop(deletelist[i]);
+            del item;
+
+            this.score++;
+        }
+        for i in range(len(bdeletelist))
+        {
+            item = this.bullets.pop(bdeletelist[i]);
+            del item;
+        }
+
+        //Check for collisions between player and enemy bullets
+        for i in range(len(this.enemyBullets))
+        {
+            colliding = this.player.CheckCollision(this.enemyBullets[i].posX, this.enemyBullets[i].posY);
+            if (colliding)
+            {
+                item = this.enemyBullets.pop(i);
+                del item;
+
+                this.gameOver = true;
+                break;
+            }
+        }
+    }
+
+    //------------------------------------------------------------------------------------
+    function SpawnEnemies(waveAmount = 1)
+    {
+        posX = int(GetScreenWidth() / 2 - (80 * 5));
+        posY = 100;
+
+        isLowestTier = false;
+
+        oldPosX = posX;
+        for y in range(waveAmount)
+        {
+            if y == waveAmount - 1
+            {
+                isLowestTier = true;
+            }
+
+            posX = oldPosX;
+            for i in range(10)
+            {
+                this.enemies.append(Enemy(this, posX, posY, isLowestTier));
+                posX += 80;
+            }
+            posY += 50;
+        }
+    }
+
+    function UpdateEnemies()
+    {
+        this.CheckEnemyDirection();
+        for i in range(len(this.enemies))
+        {
+            this.enemies[i].Update();
+        }
+
+        for i in range(len(this.enemies))
+        {
+            this.enemies[i].Render();
+        }
+
+        if len(this.enemies) == 0
+        {
+            this.waveNumber++;
+            this.SpawnEnemies(this.waveNumber);
+        }
+    }
+
+    function SwitchEnemyDirection()
+    {
+        for i in range(len(this.enemies))
+        {
+            this.enemies[i].SwitchDirection();
+        }
+    }
+
+    function CheckEnemyDirection()
+    {
+        rightmost = null;
+        for i in range(len(this.enemies))
+        {
+            if rightmost != null
+            {
+                if rightmost.posX < this.enemies[i].posX
+                {
+                    rightmost = this.enemies[i];
+                }
+            }
+            else
+            {
+                rightmost = this.enemies[i];
+            }
+        }
+        if rightmost != null
+        {
+            rightmost.SetRightmost(true);
+        }
+
+        leftmost = null;
+        for i in range(len(this.enemies))
+        {
+            if leftmost != null
+            {
+                if leftmost.posX > this.enemies[i].posX
+                {
+                    leftmost = this.enemies[i];
+                }
+            }
+            else
+            {
+                leftmost = this.enemies[i];
+            }
+        }
+        if leftmost != null
+        {
+            leftmost.SetLeftmost(true);
+        }
+    }
+
+    //Game Over
+    //------------------------------------------------------------------------------------
+    function DrawGameOver()
+    {
+        DrawText(b"Game Over", int(GetScreenWidth() / 2 - (MeasureText(b"Game Over", 120) / 2)), int(GetScreenHeight() / 2 - 50), 120, GetColor(int("ffffffff", 16)));
     }
 }

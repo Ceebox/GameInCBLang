@@ -5,8 +5,9 @@ class Main
 {
     function Main()
     {
-        InitWindow(800, 450, b"Hello Raylib");
+        InitWindow(1280, 720, b"Space Invaders");
         SetTargetFPS(60);
+        print("\n"*150); //Clear the screen
 
         game = Game();
     }

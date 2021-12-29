@@ -1,0 +1,69 @@
+class Player
+{
+    //Start
+    //--------------------------------------------------------------------------
+    function Start(game)
+    {
+        this.game = game;
+
+        this.playerPosX = 640;
+        this.playerPosY = 565;
+        this.playerSpeed = 5;
+
+        this.lastShotTime = -1;
+        this.shotCooldown = 0.5;
+
+        image = LoadImage(b"assets\player.png");
+        this.sprite = LoadTextureFromImage(image);
+        UnloadImage(image);
+    }
+
+    //Main
+    //--------------------------------------------------------------------------
+    function Update()
+    {
+        //Movement
+        if IsKeyDown(KEY_A) and this.playerPosX > 0 + 30
+        {
+            this.playerPosX -= this.playerSpeed;
+        }
+        if IsKeyDown(KEY_D) and this.playerPosX < GetScreenWidth() - 30
+        {
+            this.playerPosX += this.playerSpeed;
+        }
+
+        //Shooting
+        if IsKeyDown(KEY_SPACE) and this.lastShotTime < GetTime() - this.shotCooldown
+        {
+            this.lastShotTime = GetTime();
+            this.Shoot();
+        }
+    }
+
+    function Render()
+    {
+        //Draw player
+        screenWidth = GetScreenWidth();
+        DrawTexture(this.sprite, int(this.playerPosX - this.sprite.width/2), int(this.playerPosY - this.sprite.height/2), WHITE);
+    }
+
+    function Shoot()
+    {
+        //Create a bullet
+        this.game.bullets.append(Bullet(this.game, this.playerPosX - 2, this.playerPosY - 25));
+    }
+
+    //Collision
+    //------------------------------------------------------------------------------------
+    function CheckCollision(x, y) is bool
+    {
+        if (CheckCollisionPointRec((x, y), (this.playerPosX - 27, this.playerPosY - 30, 55, 55)))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+}

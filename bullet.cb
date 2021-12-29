@@ -1,0 +1,77 @@
+//Basic bullet
+//------------------------------------------------------------------------------
+class Bullet
+{
+    //Start
+    //--------------------------------------------------------------------------
+    function Start(game, posX, posY)
+    {
+        this.speed = 5;
+
+        this.posX = posX;
+        this.posY = posY;
+
+        this.game = game;
+    }
+
+    //Destroy
+    //--------------------------------------------------------------------------
+    function OnDestroy()
+    {
+        if this in this.game.bullets
+        {
+            this.game.bullets.remove(this);
+        }
+    }
+
+    //Main
+    //--------------------------------------------------------------------------
+    function Update()
+    {
+        this.posY -= this.speed;
+    }
+
+    function Render()
+    {
+        DrawRectangle(this.posX, this.posY, 5, 8, WHITE);
+    }
+}
+
+//Enemy Bullet
+//------------------------------------------------------------------------------
+class EnemyBullet
+{
+    //Start
+    //--------------------------------------------------------------------------
+    function Start(game, posX, posY)
+    {
+        this.speed = 5;
+
+        this.posX = posX;
+        this.posY = posY;
+
+        this.game = game;
+    }
+
+    //Destroy
+    //--------------------------------------------------------------------------
+    function OnDestroy()
+    {
+        if this in this.game.enemyBullets
+        {
+            this.game.enemyBullets.remove(this);
+        }
+    }
+
+    //Main
+    //--------------------------------------------------------------------------
+    function Update()
+    {
+        this.posY += this.speed;
+    }
+
+    function Render()
+    {
+        DrawRectangle(this.posX, this.posY, 5, 8, WHITE);
+    }
+}

@@ -1,0 +1,109 @@
+from native reference random;
+
+class Enemy
+{
+    //Init
+    //------------------------------------------------------------------------------------
+    function Start(game, posX, posY, lowestTier)
+    {
+        this.game = game;
+
+        this.speed = 2;
+        this.right = false;
+
+        this.posX = posX;
+        this.posY = posY;
+
+        this.lowestTier = lowestTier;
+
+        this.rect = [this.posX, this.posY, 55, 55];
+
+        this.leftmost = false;
+        this.rightmost = false;
+
+        image = LoadImage(b"assets\enemy.png");
+        this.sprite = LoadTextureFromImage(image);
+        UnloadImage(image);
+    }
+
+    //Destroy
+    //------------------------------------------------------------------------------------
+    function OnDestroy()
+    {
+        if this in this.game.enemies
+        {
+            this.game.enemies.remove(this);
+        }
+    }
+
+    //Main
+    //------------------------------------------------------------------------------------
+    function Update()
+    {
+        //Movement
+        if (this.right)
+        {
+            this.posX += this.speed;
+        }
+        else
+        {
+            this.posX -= this.speed;
+        }
+
+        //Bouncing
+        if (this.posX > GetScreenWidth() - 55 and this.rightmost)
+        {
+            this.game.SwitchEnemyDirection();
+        }
+        else if (this.posX < 0 and this.leftmost)
+        {
+            this.game.SwitchEnemyDirection();
+        }
+
+        //Shooting
+        if (this.lowestTier)
+        {
+            if random.randint(0, 1500) == 500
+            {
+                this.game.enemyBullets.append(EnemyBullet(this.game, this.posX, this.posY));
+            }
+        }
+    }
+
+    function Render()
+    {
+        screenWidth = GetScreenWidth();
+        DrawTexture(this.sprite, int(this.posX - this.sprite.width/2), int(this.posY - this.sprite.height/2), WHITE);
+    }
+
+    //Direction Switching
+    //------------------------------------------------------------------------------------
+    function SetLeftmost(value)
+    {
+        this.leftmost = value;
+    }
+
+    function SetRightmost(value)
+    {
+        this.rightmost = value;
+    }
+
+    function SwitchDirection()
+    {
+        this.right = not this.right;
+    }
+
+    //Collision
+    //------------------------------------------------------------------------------------
+    function CheckCollision(x, y) is bool
+    {
+        if (CheckCollisionPointRec((x, y), (this.posX - 27, this.posY - 30, 55, 55)))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+}
